@@ -1,0 +1,10 @@
+# Logs
+*.log
+pnpm-debug.log*
+
+# Command
+node_modules
+dist
+
+# System
+.DS_Store
