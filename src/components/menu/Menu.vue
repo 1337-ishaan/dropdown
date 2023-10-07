@@ -9,7 +9,6 @@
 <script setup lang="ts">
   import { ref, inject, provide, onBeforeMount, computed } from "vue";
   import { v4 as uuid } from "uuid";
-  import { withDefaults, defineProps } from "vue";
 
   import type { MenuContext, ParentMenu, Menu, MenuItem } from "./types";
   import { MenuContextKey, ParentMenuKey } from "./keys";
@@ -18,21 +17,19 @@
     id?: string;
   }
 
-  const props = withDefaults(defineProps<SubMenuProps>(), {
-    id: () => uuid(),
-  });
+  const props = defineProps<SubMenuProps>();
 
   const context = inject<MenuContext | undefined>(MenuContextKey, undefined);
   const parentMenu = inject<ParentMenu | undefined>(ParentMenuKey, undefined);
+
   const items = ref<(MenuItem | Menu)[]>([]);
   const show = ref(false);
-  const activeItem = ref<string>();
+  const activeItem = ref<string | undefined>();
 
   const activeIndex = computed(() => {
     if (!activeItem.value) {
       return -1;
     }
-
     return items.value.findIndex(it => it.id === activeItem.value);
   });
 
@@ -43,7 +40,6 @@
       if (!show.value) {
         show.value = true;
         const [firstItem] = items.value;
-
         if (firstItem) {
           activeItem.value = firstItem.id;
           context?.setActiveMenu(props.id);
@@ -75,7 +71,6 @@
           activeItem.value =
             items.value[Math.min(activeIndex.value + 1, max)]?.id;
           break;
-
         case "up":
           activeItem.value =
             items.value[Math.max(activeIndex.value - 1, min)]?.id;
@@ -85,7 +80,6 @@
 
     openSubmenu() {
       const item = items.value[activeIndex.value];
-
       if (item && "open" in item) {
         item.open();
       }
@@ -96,18 +90,15 @@
         parentMenu?.closeSubmenu();
       } else {
         const item = items.value[activeIndex.value];
-
         if (item && "close" in item) {
           item.close();
         }
-
         context?.setActiveMenu(props.id);
       }
     },
 
     click() {
       const item = items.value[activeIndex.value];
-
       if (item && "open" in item) {
         item.open();
       } else {
@@ -123,11 +114,9 @@
     activeItem,
     activePath: computed(() => {
       const path = parentMenu?.activePath.value ?? [];
-
       if (activeItem.value) {
         path.push(activeItem.value);
       }
-
       return path.filter(
         item =>
           !items.value.find(it => it.id === item && it.id !== activeItem.value)
@@ -153,7 +142,7 @@
   });
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
   .menu {
     padding: 0.5rem;
     border: 1px solid #646464 !important;

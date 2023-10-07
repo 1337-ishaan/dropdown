@@ -1,7 +1,7 @@
 <template>
   <button
     :id="menu?.id"
-    :style="style"
+    :style="buttonStyle"
     :tabindex="menu?.root ? 0 : -1"
     class="menu-button"
     @keydown="onKeyDown"
@@ -10,7 +10,7 @@
   </button>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
   import { computed, onBeforeMount, inject } from "vue";
 
   import type { ParentMenu } from "./types";
@@ -19,10 +19,12 @@
   const menu = inject<ParentMenu | undefined>(ParentMenuKey, undefined);
 
   onBeforeMount(() => {
-    menu?.addItem({
-      id: menu.id,
-      hasChildren: true,
-    });
+    if (menu) {
+      menu.addItem({
+        id: menu.id,
+        hasChildren: true,
+      });
+    }
   });
 
   const onKeyDown = (event: KeyboardEvent) => {
@@ -33,26 +35,26 @@
     }
 
     if (["Enter", " ", "ArrowDown"].includes(event.key)) {
-      menu?.open();
+      menu.open();
     }
 
-    if (["Escape"].includes(event.key)) {
-      menu?.close();
+    if (event.key === "Escape") {
+      menu.close();
     }
   };
 
-  const style = computed(() => {
+  const buttonStyle = computed(() => {
     if (!menu) {
       return "";
     }
 
     const [lastActive] = menu.activePath.value.slice(-1);
 
-    if (lastActive === menu?.id) {
+    if (lastActive === menu.id) {
       return "background-color: red !important";
     }
 
-    if (menu.activePath.value.includes(menu?.id)) {
+    if (menu.activePath.value.includes(menu.id)) {
       return "background-color: #dedede";
     }
 

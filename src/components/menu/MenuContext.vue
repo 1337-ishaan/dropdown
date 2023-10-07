@@ -4,8 +4,8 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-  import { ref, provide, watch } from "vue";
+<script setup lang="ts">
+  import { ref, provide } from "vue";
   import { v4 as uuid } from "uuid";
 
   import { TreeStructure } from "../../TreeStructure";
@@ -13,19 +13,16 @@
   import type { MenuContext, Menu, MenuItem } from "./types";
   import { MenuContextKey } from "./keys";
 
-  export interface MenuContextProps {
+  interface MenuContextProps {
     id?: string;
   }
 
-  const props = withDefaults(defineProps<MenuContextProps>(), {
-    id: () => uuid(),
-  });
+  const props = defineProps<MenuContextProps>();
 
   const tree = ref(
     new TreeStructure<Menu | MenuItem>({
       id: props.id,
       children: [],
-      /* eslint-disable @typescript-eslint/no-empty-function */
       open: () => {},
       close: () => {},
       toggle: () => {},
@@ -47,7 +44,7 @@
       const found = tree.value.find(id);
 
       if (found && "open" in found.tree) {
-        activeMenu.value = found?.tree;
+        activeMenu.value = found.tree;
       }
     },
   });
@@ -57,24 +54,23 @@
       return;
     }
 
-    if (event.key === "ArrowRight") {
-      activeMenu.value.openSubmenu();
-    }
-
-    if (event.key === "ArrowLeft") {
-      activeMenu.value.closeSubmenu(true);
-    }
-
-    if (event.key === "ArrowDown") {
-      activeMenu.value.navigate("down");
-    }
-
-    if (event.key === "ArrowUp") {
-      activeMenu.value.navigate("up");
-    }
-
-    if (["Enter", " "].includes(event.key)) {
-      activeMenu.value.click();
+    switch (event.key) {
+      case "ArrowRight":
+        activeMenu.value.openSubmenu();
+        break;
+      case "ArrowLeft":
+        activeMenu.value.closeSubmenu(true);
+        break;
+      case "ArrowDown":
+        activeMenu.value.navigate("down");
+        break;
+      case "ArrowUp":
+        activeMenu.value.navigate("up");
+        break;
+      case "Enter":
+      case " ":
+        activeMenu.value.click();
+        break;
     }
   };
 </script>
